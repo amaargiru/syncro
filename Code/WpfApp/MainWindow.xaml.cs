@@ -48,6 +48,16 @@ public partial class MainWindow : Window
         {
             Synchronize synchronize = new();
             var synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
+
+            foreach (var file in synchInfo.SourceFilesToCopy)
+            {
+                PrimaryDataGrid.Items.Add(file);
+            }
+
+            foreach (var dir in synchInfo.SourceDirectoriesToCreate)
+            {
+                PrimaryDataGrid.Items.Add(dir);
+            }
         }
     }
 }

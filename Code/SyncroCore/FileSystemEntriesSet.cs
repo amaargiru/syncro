@@ -1,16 +1,20 @@
 ﻿namespace SyncroCore;
 
-public class FileSystemEntriesSet
+internal class FileSystemEntriesSet
 {
     // Returns sets of files and directories
-    public FileSystemInfo Get(string rootDir)
+    internal FileSystemInfo Get(string rootDir)
     {
         if (Directory.Exists(rootDir))
         {
             var dirInfo = new DirectoryInfo(rootDir);
             SortedSet<FileInfo> files;
             SortedSet<DirectoryInfo> dirs;
-            FileSystemInfo fileSystemInfo = new();
+            FileSystemInfo fileSystemInfo = new()
+            {
+                FileSet = new(),
+                DirSet = new()
+            };
 
             try
             {
@@ -29,8 +33,8 @@ public class FileSystemEntriesSet
                 fileSystemInfo.FileSet.Add
                 (new FileSystemEntryInfo
                 {
-                // Remove parent directory's name from relative path
-                Name = file.Name[(file.Name.IndexOf(Path.DirectorySeparatorChar) + 1)..],
+                    // Remove parent directory's name from relative path
+                    Name = file.Name[(file.Name.IndexOf(Path.DirectorySeparatorChar) + 1)..],
                     Length = file.Length,
                     LastWriteTime = file.LastWriteTime
                 });
@@ -41,8 +45,8 @@ public class FileSystemEntriesSet
                 fileSystemInfo.DirSet.Add
                 (new FileSystemEntryInfo
                 {
-                // Remove parent directory's name from relative path
-                Name = dir.Name[(dir.Name.IndexOf(Path.DirectorySeparatorChar) + 1)..]
+                    // Remove parent directory's name from relative path
+                    Name = dir.Name[(dir.Name.IndexOf(Path.DirectorySeparatorChar) + 1)..]
                 });
             }
 
