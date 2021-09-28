@@ -1,6 +1,6 @@
 ﻿namespace SyncroCore;
 
-public record FileSystemInfo
+public record SystemTreeInfo
 {
     public SortedSet<FileSystemEntryInfo> FileSet { get; set; }
     public SortedSet<FileSystemEntryInfo> DirSet { get; set; }

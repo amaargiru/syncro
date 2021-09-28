@@ -4,7 +4,7 @@
 public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
 {
     public string Name { get; set; }
-    public long Length { get; set; }
+    public long Size { get; set; }
     public DateTime LastWriteTime { get; set; }
 
     public int CompareTo(FileSystemEntryInfo other)
@@ -25,7 +25,7 @@ public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
             return nameComparison;
         }
 
-        var lengthComparison = Length.CompareTo(other.Length);
+        var lengthComparison = Size.CompareTo(other.Size);
         if (lengthComparison != 0)
         {
             return lengthComparison;
