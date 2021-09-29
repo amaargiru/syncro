@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Syncro"
-        Height="450" Width="900" WindowState="Maximized">
+        Height="500" Width="900"
+        MinHeight="450" MinWidth="900"
+        WindowState="Maximized">
 
     <Grid x:Name="MainGrid">
 
@@ -48,8 +50,8 @@
             </Grid.ColumnDefinitions>
 
 
-            <TextBox x:Name="OpenPrimaryTextBox" IsReadOnly="True"/>
-            <Button Grid.Column="1" Content="Open" x:Name="OpenPrimaryButton" Click="OpenPrimaryButton_Click"/>
+            <TextBox x:Name="OpenPrimaryTextBox" IsReadOnly="True" Margin="4,4,4,4"/>
+            <Button Grid.Column="1" Content="  Open  " x:Name="OpenPrimaryButton" Click="OpenPrimaryButton_Click" Margin="4,4,4,4"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="2" x:Name="OpenSecondaryGrid">
@@ -59,23 +61,25 @@
                 <ColumnDefinition x:Name="SecondaryButtonColumn" Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="OpenSecondaryTextBox" IsReadOnly="True"/>
-            <Button Grid.Column="1" Content="Open" x:Name="OpenSecondaryButton" Click="OpenSecondaryButton_Click"/>
+            <TextBox x:Name="OpenSecondaryTextBox" IsReadOnly="True" Margin="4,4,4,4"/>
+            <Button Grid.Column="1" Content="  Open  " x:Name="OpenSecondaryButton" Click="OpenSecondaryButton_Click" Margin="4,4,4,4"/>
         </Grid>
 
         <DataGrid Grid.Column="0" Grid.Row="3" HeadersVisibility="Column" AutoGenerateColumns="False" x:Name="PrimaryDataGrid">
 
             <DataGrid.Columns>
 
-                <DataGridTemplateColumn Header="Icon" Width="5*">
+                <DataGridTemplateColumn Header="Name" Width="65*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding Icon}" Height="16"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Height="16"/>
+                                <TextBlock Text="{Binding Path=Name}"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn Header="Name" Width="60*" Binding="{Binding Name}"/>
                 <DataGridTextColumn Header="Last write time" Width="20*" Binding="{Binding LastWriteTime}"/>
                 <DataGridTextColumn Header="Size" Width="15*" Binding="{Binding Size}"/>
             </DataGrid.Columns>
@@ -96,16 +100,18 @@
 
         <DataGrid Grid.Column="4" Grid.Row="3" HeadersVisibility="Column" AutoGenerateColumns="False" x:Name="SecondaryDataGrid">
             <DataGrid.Columns>
-                
-                <DataGridTemplateColumn Header="Icon" Width="5*">
+
+                <DataGridTemplateColumn Header="Name" Width="65*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Source="{Binding Icon}" />
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="{Binding Icon}" Height="16"/>
+                                <TextBlock Text="{Binding Path=Name}"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                
-                <DataGridTextColumn Header="Name" Width="60*" Binding="{Binding Name}"/>
+
                 <DataGridTextColumn Header="Last write time" Width="20*" Binding="{Binding LastWriteTime}"/>
                 <DataGridTextColumn Header="Size" Width="15*" Binding="{Binding Size}"/>
             </DataGrid.Columns>
