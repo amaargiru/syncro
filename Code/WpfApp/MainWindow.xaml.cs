@@ -10,13 +10,15 @@ public partial class MainWindow : Window
 {
     private string primaryDirectory;
     private string secondaryDirectory;
-    private BitmapImage myImageSource;
+    private BitmapImage folderImageSource, copyImageSource, delImageSource;
 
     public MainWindow()
     {
         InitializeComponent();
         primaryDirectory = secondaryDirectory = "";
-        myImageSource = new BitmapImage(new Uri("Images/folder.ico", UriKind.Relative));
+        folderImageSource = new BitmapImage(new Uri("Images/folder.ico", UriKind.Relative));
+        copyImageSource = new BitmapImage(new Uri("Images/copy.ico", UriKind.Relative));
+        delImageSource = new BitmapImage(new Uri("Images/del.ico", UriKind.Relative));
     }
 
     private void OpenPrimaryButton_Click(object sender, RoutedEventArgs e)
@@ -59,41 +61,76 @@ public partial class MainWindow : Window
 
             foreach (var file in synchInfo.SourceFilesToCopy)
             {
-                // Extract file icon
-                var filePath = Path.Combine(primaryDirectory, file.Name);
-                var sysicon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
-                var bmpSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-                        sysicon.Handle,
-                        Int32Rect.Empty,
-                        BitmapSizeOptions.FromEmptyOptions());
-                sysicon.Dispose();
-
                 DisplayedFileSystemEntryInfo displayedPrimaryEntry = new()
                 {
-                    Icon = bmpSrc,
+                    Icon = ExtractFileIcon(file),
                     Name = file.Name,
                     Size = file.Size.ToString(),
                     LastWriteTime = file.LastWriteTime.ToString()
                 };
 
                 PrimaryDataGrid.Items.Add(displayedPrimaryEntry);
+                OperationDataGrid.Items.Add(new DisplayedOperationEntryInfo() { Icon = copyImageSource });
                 SecondaryDataGrid.Items.Add(displayedEmptyEntry);
             }
 
             foreach (var dir in synchInfo.SourceDirectoriesToCreate)
             {
-                DisplayedFileSystemEntryInfo displayedEntry = new()
+                DisplayedFileSystemEntryInfo displayedPrimaryEntry = new()
                 {
-                    Icon = myImageSource,
+                    Icon = folderImageSource,
                     Name = dir.Name,
-                    Size = "",
+                    Size = "<Folder>",
                     LastWriteTime = ""
                 };
 
-                PrimaryDataGrid.Items.Add(displayedEntry);
+                PrimaryDataGrid.Items.Add(displayedPrimaryEntry);
+                OperationDataGrid.Items.Add(new DisplayedOperationEntryInfo() { Icon = copyImageSource });
                 SecondaryDataGrid.Items.Add(displayedEmptyEntry);
             }
+
+            foreach (var file in synchInfo.DestinationFilesToDelete)
+            {
+                DisplayedFileSystemEntryInfo displayedSecondaryEntry = new()
+                {
+                    Icon = ExtractFileIcon(file),
+                    Name = file.Name,
+                    Size = file.Size.ToString(),
+                    LastWriteTime = file.LastWriteTime.ToString()
+                };
+
+                PrimaryDataGrid.Items.Add(displayedEmptyEntry);
+                OperationDataGrid.Items.Add(new DisplayedOperationEntryInfo() { Icon = delImageSource });
+                SecondaryDataGrid.Items.Add(displayedSecondaryEntry);
+            }
+
+            foreach (var dir in synchInfo.SourceDirectoriesToCreate)
+            {
+                DisplayedFileSystemEntryInfo displayedSecondaryEntry = new()
+                {
+                    Icon = folderImageSource,
+                    Name = dir.Name,
+                    Size = "<Folder>",
+                    LastWriteTime = ""
+                };
+
+                PrimaryDataGrid.Items.Add(displayedEmptyEntry);
+                OperationDataGrid.Items.Add(new DisplayedOperationEntryInfo() { Icon = delImageSource });
+                SecondaryDataGrid.Items.Add(displayedSecondaryEntry);
+            }
         }
+    }
+
+    private BitmapSource ExtractFileIcon(FileSystemEntryInfo file)
+    {
+        var filePath = Path.Combine(primaryDirectory, file.Name);
+        var sysicon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+        var bmpSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
+                sysicon.Handle,
+                Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+        sysicon.Dispose();
+        return bmpSrc;
     }
 }
 
@@ -103,4 +140,9 @@ public record DisplayedFileSystemEntryInfo
     public string Name { get; set; }
     public string Size { get; set; }
     public string LastWriteTime { get; set; }
+}
+
+public record DisplayedOperationEntryInfo
+{
+    public BitmapSource Icon { get; set; }
 }

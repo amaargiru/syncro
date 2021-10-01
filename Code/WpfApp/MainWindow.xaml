@@ -37,9 +37,9 @@
         </Menu>
 
         <StackPanel Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Orientation="Horizontal" x:Name="ButtonStackPanel">
-            <Button Content="Compare" x:Name="CompareButton" Click="CompareButton_Click"/>
-            <Button Content="Stop" x:Name="StopButton"/>
-            <Button Content="Synchronize" x:Name="SynchronizeButton"/>
+            <Button Content=" Compare " x:Name="CompareButton" Click="CompareButton_Click" Margin="4,4,4,4"/>
+            <Button Content=" Stop " x:Name="StopButton" Margin="4,4,4,4"/>
+            <Button Content=" Synchronize " x:Name="SynchronizeButton" Margin="4,4,4,4"/>
         </StackPanel>
 
         <Grid Grid.Column="0" Grid.Row="2" x:Name="OpenPrimaryGrid">
@@ -49,9 +49,8 @@
                 <ColumnDefinition x:Name="PrimaryButtonColumn" Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-
             <TextBox x:Name="OpenPrimaryTextBox" IsReadOnly="True" Margin="4,4,4,4"/>
-            <Button Grid.Column="1" Content="  Open  " x:Name="OpenPrimaryButton" Click="OpenPrimaryButton_Click" Margin="4,4,4,4"/>
+            <Button Grid.Column="2" Content="  Open  " x:Name="OpenPrimaryButton" Click="OpenPrimaryButton_Click" Margin="4,4,4,4"/>
         </Grid>
 
         <Grid Grid.Column="4" Grid.Row="2" x:Name="OpenSecondaryGrid">
@@ -62,10 +61,11 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="OpenSecondaryTextBox" IsReadOnly="True" Margin="4,4,4,4"/>
-            <Button Grid.Column="1" Content="  Open  " x:Name="OpenSecondaryButton" Click="OpenSecondaryButton_Click" Margin="4,4,4,4"/>
+            <Button Grid.Column="2" Content="  Open  " x:Name="OpenSecondaryButton" Click="OpenSecondaryButton_Click" Margin="4,4,4,4"/>
         </Grid>
 
-        <DataGrid Grid.Column="0" Grid.Row="3" HeadersVisibility="Column" AutoGenerateColumns="False" x:Name="PrimaryDataGrid">
+        <DataGrid Grid.Column="0" Grid.Row="3" IsReadOnly="true" HeadersVisibility="Column" AutoGenerateColumns="False"
+                  x:Name="PrimaryDataGrid" AlternationCount="2" AlternatingRowBackground="WhiteSmoke">
 
             <DataGrid.Columns>
 
@@ -89,16 +89,34 @@
         <GridSplitter Grid.Column="1" Grid.Row="2" Grid.RowSpan="2" x:Name="LeftSplitter" ShowsPreview="False" 
                       HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="4" Margin="8,4,8,4"/>
 
-        <DataGrid Grid.Column="2" Grid.Row="3" AutoGenerateColumns="False" x:Name="OperationDataGrid">
+        <DataGrid Grid.Column="2" Grid.Row="3" IsReadOnly="true" HeadersVisibility="Column" AutoGenerateColumns="False"
+                  x:Name="OperationDataGrid" AlternationCount="2" AlternatingRowBackground="WhiteSmoke">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Operation" Width="100*" />
+
+                <DataGridTemplateColumn Header="Operation" Width="100*">
+
+                    <DataGridTemplateColumn.HeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTemplateColumn.HeaderStyle>
+
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding Icon}" Height="16"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+
+                </DataGridTemplateColumn>
+
             </DataGrid.Columns>
         </DataGrid>
 
         <GridSplitter Grid.Column="3" Grid.Row="2" Grid.RowSpan="2" x:Name="RightSplitter" ShowsPreview="False" 
                       HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="4" Margin="8,4,8,4"/>
 
-        <DataGrid Grid.Column="4" Grid.Row="3" HeadersVisibility="Column" AutoGenerateColumns="False" x:Name="SecondaryDataGrid">
+        <DataGrid Grid.Column="4" Grid.Row="3" IsReadOnly="true" HeadersVisibility="Column" AutoGenerateColumns="False"
+                  x:Name="SecondaryDataGrid" AlternationCount="2" AlternatingRowBackground="WhiteSmoke">
             <DataGrid.Columns>
 
                 <DataGridTemplateColumn Header="Name" Width="65*">
