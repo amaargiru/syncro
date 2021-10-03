@@ -9,12 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="folder.ico" />
-	  <None Remove="Images\copy.ico" />
-	  <None Remove="Images\del.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<!-- For open folder dialog -->
 		<PackageReference Include="Ookii.Dialogs.Wpf" Version="4.0.0" />
 	</ItemGroup>
 
@@ -23,9 +18,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="Images\copy.ico" />
-	  <Resource Include="Images\del.ico" />
-	  <Resource Include="Images\folder.ico" />
+		<None Remove="Images\folder.ico" />
+		<None Remove="Images\copy.ico" />
+		<None Remove="Images\del.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="Images\folder.ico" />
+		<Resource Include="Images\copy.ico" />
+		<Resource Include="Images\del.ico" />
 	</ItemGroup>
 
 </Project>

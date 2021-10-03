@@ -3,7 +3,8 @@
 // Light weight alternative for FileInfo and DirectoryInfo
 public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
 {
-    public string Name { get; set; }
+    public string ShortName { get; set; }// Show to user
+    public string MiddleName { get; set; }
     public long Size { get; set; }
     public DateTime LastWriteTime { get; set; }
 
@@ -19,7 +20,7 @@ public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
             return 1;
         }
 
-        var nameComparison = string.CompareOrdinal(Name, other.Name);
+        var nameComparison = string.CompareOrdinal(MiddleName, other.MiddleName);
         if (nameComparison != 0)
         {
             return nameComparison;

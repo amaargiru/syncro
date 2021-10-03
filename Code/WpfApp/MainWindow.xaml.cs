@@ -52,19 +52,33 @@ public partial class MainWindow : Window
         primaryDirectory = "D:\\NeatData\\CurrentWorks\\syncro\\Code\\WpfApp\\bin\\Debug\\net6.0-windows\\source";
         secondaryDirectory = "D:\\NeatData\\CurrentWorks\\syncro\\Code\\WpfApp\\bin\\Debug\\net6.0-windows\\destination";
 
+
         if (Directory.Exists(primaryDirectory) && Directory.Exists(secondaryDirectory))
         {
             Synchronize synchronize = new();
             var synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
 
+            DisplayDiff(primaryDirectory, secondaryDirectory, synchInfo);
+
+            synchronize.DeleteSecondaryFiles(secondaryDirectory, synchInfo);
+            synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);
+            synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
+            synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
+        }
+    }
+
+    private void DisplayDiff(string primaryDirectory, string secondaryDirectory, SynchInfo synchInfo)
+    {
+        if (Directory.Exists(primaryDirectory) && Directory.Exists(secondaryDirectory))
+        {
             DisplayedFileSystemEntryInfo displayedEmptyEntry = new() { };
 
             foreach (var file in synchInfo.SourceFilesToCopy)
             {
                 DisplayedFileSystemEntryInfo displayedPrimaryEntry = new()
                 {
-                    Icon = ExtractFileIcon(file),
-                    Name = file.Name,
+                    Icon = ExtractFileIcon(primaryDirectory, file),
+                    Name = file.ShortName,
                     Size = file.Size.ToString(),
                     LastWriteTime = file.LastWriteTime.ToString()
                 };
@@ -74,12 +88,12 @@ public partial class MainWindow : Window
                 SecondaryDataGrid.Items.Add(displayedEmptyEntry);
             }
 
-            foreach (var dir in synchInfo.SourceDirectoriesToCreate)
+            foreach (var dir in synchInfo.DestinationDirectoriesToCreate)
             {
                 DisplayedFileSystemEntryInfo displayedPrimaryEntry = new()
                 {
                     Icon = folderImageSource,
-                    Name = dir.Name,
+                    Name = dir.ShortName,
                     Size = "<Folder>",
                     LastWriteTime = ""
                 };
@@ -93,8 +107,8 @@ public partial class MainWindow : Window
             {
                 DisplayedFileSystemEntryInfo displayedSecondaryEntry = new()
                 {
-                    Icon = ExtractFileIcon(file),
-                    Name = file.Name,
+                    Icon = ExtractFileIcon(secondaryDirectory, file),
+                    Name = file.ShortName,
                     Size = file.Size.ToString(),
                     LastWriteTime = file.LastWriteTime.ToString()
                 };
@@ -104,12 +118,12 @@ public partial class MainWindow : Window
                 SecondaryDataGrid.Items.Add(displayedSecondaryEntry);
             }
 
-            foreach (var dir in synchInfo.SourceDirectoriesToCreate)
+            foreach (var dir in synchInfo.DestinationDirectoriesToDelete)
             {
                 DisplayedFileSystemEntryInfo displayedSecondaryEntry = new()
                 {
                     Icon = folderImageSource,
-                    Name = dir.Name,
+                    Name = dir.ShortName,
                     Size = "<Folder>",
                     LastWriteTime = ""
                 };
@@ -121,9 +135,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private BitmapSource ExtractFileIcon(FileSystemEntryInfo file)
+    private BitmapSource ExtractFileIcon(string directory, FileSystemEntryInfo file)
     {
-        var filePath = Path.Combine(primaryDirectory, file.Name);
+        var filePath = directory + file.MiddleName;
         var sysicon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
         var bmpSrc = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
                 sysicon.Handle,

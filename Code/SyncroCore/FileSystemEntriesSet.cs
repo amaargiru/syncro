@@ -46,7 +46,8 @@ internal class FileSystemEntriesSet
                 (new FileSystemEntryInfo
                 {
                     // Remove parent directory's name from relative path
-                    Name = file.Name[(file.Name.IndexOf(Path.DirectorySeparatorChar) + 1)..],
+                    MiddleName = file.FullName.Replace(rootDir, ""),
+                    ShortName = file.Name,
                     Size = file.Length,
                     LastWriteTime = file.LastWriteTime
                 });
@@ -58,7 +59,8 @@ internal class FileSystemEntriesSet
                 (new FileSystemEntryInfo
                 {
                     // Remove parent directory's name from relative path
-                    Name = dir.Name[(dir.Name.IndexOf(Path.DirectorySeparatorChar) + 1)..]
+                    MiddleName = dir.FullName.Replace(rootDir, ""),
+                    ShortName = dir.Name
                 });
             }
 
