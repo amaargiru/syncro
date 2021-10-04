@@ -11,6 +11,8 @@ public partial class MainWindow : Window
     private string primaryDirectory;
     private string secondaryDirectory;
     private BitmapImage folderImageSource, copyImageSource, delImageSource;
+    Synchronize synchronize = new();
+    SynchInfo synchInfo = new();
 
     public MainWindow()
     {
@@ -52,19 +54,19 @@ public partial class MainWindow : Window
         primaryDirectory = "D:\\NeatData\\CurrentWorks\\syncro\\Code\\WpfApp\\bin\\Debug\\net6.0-windows\\source";
         secondaryDirectory = "D:\\NeatData\\CurrentWorks\\syncro\\Code\\WpfApp\\bin\\Debug\\net6.0-windows\\destination";
 
-
         if (Directory.Exists(primaryDirectory) && Directory.Exists(secondaryDirectory))
         {
-            Synchronize synchronize = new();
-            var synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
-
+            synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
             DisplayDiff(primaryDirectory, secondaryDirectory, synchInfo);
-
-            synchronize.DeleteSecondaryFiles(secondaryDirectory, synchInfo);
-            synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);
-            synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
-            synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
         }
+    }
+
+    private void SynchronizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        synchronize.DeleteSecondaryFiles(secondaryDirectory, synchInfo);
+        synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);
+        synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
+        synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
     }
 
     private void DisplayDiff(string primaryDirectory, string secondaryDirectory, SynchInfo synchInfo)
@@ -73,7 +75,7 @@ public partial class MainWindow : Window
         {
             DisplayedFileSystemEntryInfo displayedEmptyEntry = new() { };
 
-            foreach (var file in synchInfo.SourceFilesToCopy)
+            foreach (var file in synchInfo.PrimaryFilesToCopy)
             {
                 DisplayedFileSystemEntryInfo displayedPrimaryEntry = new()
                 {
@@ -88,7 +90,7 @@ public partial class MainWindow : Window
                 SecondaryDataGrid.Items.Add(displayedEmptyEntry);
             }
 
-            foreach (var dir in synchInfo.DestinationDirectoriesToCreate)
+            foreach (var dir in synchInfo.SecondaryDirectoriesToCreate)
             {
                 DisplayedFileSystemEntryInfo displayedPrimaryEntry = new()
                 {
@@ -103,7 +105,7 @@ public partial class MainWindow : Window
                 SecondaryDataGrid.Items.Add(displayedEmptyEntry);
             }
 
-            foreach (var file in synchInfo.DestinationFilesToDelete)
+            foreach (var file in synchInfo.SecondaryFilesToDelete)
             {
                 DisplayedFileSystemEntryInfo displayedSecondaryEntry = new()
                 {
@@ -118,7 +120,7 @@ public partial class MainWindow : Window
                 SecondaryDataGrid.Items.Add(displayedSecondaryEntry);
             }
 
-            foreach (var dir in synchInfo.DestinationDirectoriesToDelete)
+            foreach (var dir in synchInfo.SecondaryDirectoriesToDelete)
             {
                 DisplayedFileSystemEntryInfo displayedSecondaryEntry = new()
                 {

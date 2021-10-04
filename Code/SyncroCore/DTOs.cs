@@ -8,8 +8,8 @@ public record SystemTreeInfo
 
 public record SynchInfo
 {
-    public SortedSet<FileSystemEntryInfo> DestinationFilesToDelete { get; set; }
-    public SortedSet<FileSystemEntryInfo> DestinationDirectoriesToDelete { get; set; }
-    public SortedSet<FileSystemEntryInfo> DestinationDirectoriesToCreate { get; set; }
-    public SortedSet<FileSystemEntryInfo> SourceFilesToCopy { get; set; }
+    public SortedSet<FileSystemEntryInfo> SecondaryFilesToDelete { get; set; }
+    public SortedSet<FileSystemEntryInfo> SecondaryDirectoriesToDelete { get; set; }
+    public SortedSet<FileSystemEntryInfo> SecondaryDirectoriesToCreate { get; set; }
+    public SortedSet<FileSystemEntryInfo> PrimaryFilesToCopy { get; set; }
 }

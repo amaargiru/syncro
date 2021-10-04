@@ -7,27 +7,27 @@ public class Synchronize
         FileSystemEntriesSet fileSystemEntriesSet = new();
         SynchInfo synchInfo = new();
 
-        var sourceSystemInfo = fileSystemEntriesSet.Get(primaryDirectory);
-        var destinationSystemInfo = fileSystemEntriesSet.Get(secondaryDirectory);
+        var primarySystemInfo = fileSystemEntriesSet.Get(primaryDirectory);
+        var secondarySystemInfo = fileSystemEntriesSet.Get(secondaryDirectory);
 
-        synchInfo.DestinationFilesToDelete = destinationSystemInfo.FileSet.Clone();
-        synchInfo.DestinationFilesToDelete.ExceptWith(sourceSystemInfo.FileSet);
+        synchInfo.SecondaryFilesToDelete = secondarySystemInfo.FileSet.Clone();
+        synchInfo.SecondaryFilesToDelete.ExceptWith(primarySystemInfo.FileSet);
 
-        synchInfo.DestinationDirectoriesToDelete = destinationSystemInfo.DirSet.Clone();
-        synchInfo.DestinationDirectoriesToDelete.ExceptWith(sourceSystemInfo.DirSet);
+        synchInfo.SecondaryDirectoriesToDelete = secondarySystemInfo.DirSet.Clone();
+        synchInfo.SecondaryDirectoriesToDelete.ExceptWith(primarySystemInfo.DirSet);
 
-        synchInfo.DestinationDirectoriesToCreate = sourceSystemInfo.DirSet.Clone();
-        synchInfo.DestinationDirectoriesToCreate.ExceptWith(destinationSystemInfo.DirSet);
+        synchInfo.SecondaryDirectoriesToCreate = primarySystemInfo.DirSet.Clone();
+        synchInfo.SecondaryDirectoriesToCreate.ExceptWith(secondarySystemInfo.DirSet);
 
-        synchInfo.SourceFilesToCopy = sourceSystemInfo.FileSet.Clone();
-        synchInfo.SourceFilesToCopy.ExceptWith(destinationSystemInfo.FileSet);
+        synchInfo.PrimaryFilesToCopy = primarySystemInfo.FileSet.Clone();
+        synchInfo.PrimaryFilesToCopy.ExceptWith(secondarySystemInfo.FileSet);
 
         return synchInfo;
     }
 
     public void DeleteSecondaryFiles(string secondaryDirectory, SynchInfo synchInfo)
     {
-        foreach (var file in synchInfo.DestinationFilesToDelete)
+        foreach (var file in synchInfo.SecondaryFilesToDelete)
         {
             File.Delete(secondaryDirectory + file.MiddleName);
         }
@@ -35,7 +35,7 @@ public class Synchronize
 
     public void DeleteSecondaryDirectories(string secondaryDirectory, SynchInfo synchInfo)
     {
-        foreach (var dir in synchInfo.DestinationDirectoriesToDelete)
+        foreach (var dir in synchInfo.SecondaryDirectoriesToDelete)
         {
             // This folder may have been deleted by a previous operation as a subfolder
             if (Directory.Exists(secondaryDirectory + dir.MiddleName))
@@ -47,7 +47,7 @@ public class Synchronize
 
     public void CreateSecondaryDirectories(string secondaryDirectory, SynchInfo synchInfo)
     {
-        foreach (var dir in synchInfo.DestinationDirectoriesToCreate)
+        foreach (var dir in synchInfo.SecondaryDirectoriesToCreate)
         {
             Directory.CreateDirectory(secondaryDirectory + dir.MiddleName);
         }
@@ -55,7 +55,7 @@ public class Synchronize
 
     public void CopyFilesFromPrimaryToSecondary(string primaryDirectory, string secondaryDirectory, SynchInfo synchInfo)
     {
-        foreach (var file in synchInfo.SourceFilesToCopy)
+        foreach (var file in synchInfo.PrimaryFilesToCopy)
         {
             File.Copy(primaryDirectory + file.MiddleName, secondaryDirectory + file.MiddleName, true);
         }

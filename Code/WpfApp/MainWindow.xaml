@@ -39,7 +39,7 @@
         <StackPanel Grid.Column="0" Grid.ColumnSpan="5" Grid.Row="1" Orientation="Horizontal" x:Name="ButtonStackPanel">
             <Button Content=" Compare " x:Name="CompareButton" Click="CompareButton_Click" Margin="4,4,4,4"/>
             <Button Content=" Stop " x:Name="StopButton" Margin="4,4,4,4"/>
-            <Button Content=" Synchronize " x:Name="SynchronizeButton" Margin="4,4,4,4"/>
+            <Button Content=" Synchronize " x:Name="SynchronizeButton" Click="SynchronizeButton_Click" Margin="4,4,4,4"/>
         </StackPanel>
 
         <Grid Grid.Column="0" Grid.Row="2" x:Name="OpenPrimaryGrid">
