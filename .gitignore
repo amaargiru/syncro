@@ -11,10 +11,7 @@
 # Private settings like passwords etc
 appsettings_private.json
 
-# Этот проект для отчета генерирует png-файлы, не нуждающиеся в сохранении
-*.png
-
-# Логи
+# Logs
 *.log.*
 
 # User-specific files
