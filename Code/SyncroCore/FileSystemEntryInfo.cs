@@ -3,12 +3,12 @@
 // Light weight alternative for FileInfo and DirectoryInfo
 public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
 {
-    public string ShortName { get; set; }// Show to user
-    public string MiddleName { get; set; }
+    public string? ShortName { get; set; } // Show to user
+    public string? MiddleName { get; set; }
     public long Size { get; set; }
     public DateTime LastWriteTime { get; set; }
 
-    public int CompareTo(FileSystemEntryInfo other)
+    public int CompareTo(FileSystemEntryInfo? other)
     {
         if (ReferenceEquals(this, other))
         {
