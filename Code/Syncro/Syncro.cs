@@ -1,6 +1,17 @@
 ﻿using SyncroCore;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
-Console.WriteLine("Run Syncro...");
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.File(@"log\log2048.txt",
+        fileSizeLimitBytes: 1000_000,
+        retainedFileCountLimit: 5,
+        rollOnFileSizeLimit: true)
+    .CreateLogger();
+
+Log.Debug("Run Syncro...");
 
 Synchronize synchronize = new();
 SynchInfo synchInfo;
