@@ -4,7 +4,9 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
-    .WriteTo.Console(theme: AnsiConsoleTheme.Code)
+    .WriteTo.Console(
+         theme: AnsiConsoleTheme.Code,
+         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
     .WriteTo.File(@"log\log2048.txt",
         fileSizeLimitBytes: 1000_000,
         retainedFileCountLimit: 5,
@@ -38,6 +40,7 @@ else
    synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
 
    var totalItemsToDo = synchInfo.Count();
+   Log.Debug($"Total items = {totalItemsToDo}");
 
    synchronize.DeleteSecondaryFiles(secondaryDirectory, synchInfo);
    synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);

@@ -3,7 +3,7 @@
 // Light weight alternative for FileInfo and DirectoryInfo
 public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
 {
-    public string? ShortName { get; set; } // Show to user
+    public string? ShortName { get; set; }
     public string? MiddleName { get; set; }
     public long Size { get; set; }
     public DateTime LastWriteTime { get; set; }
