@@ -4,7 +4,7 @@ namespace SyncroCore;
 
 internal class FileSystemEntriesSet
 {
-   // Returns sets of files and directories
+   /// Returns sets of files and directories
    internal SystemTreeInfo Get(string rootDir)
    {
       if (Directory.Exists(rootDir))
@@ -16,8 +16,7 @@ internal class FileSystemEntriesSet
             DirSet = new()
          };
 
-         SortedSet<FileInfo> files = new SortedSet<FileInfo>(dirInfo.EnumerateFiles("*", SearchOption.AllDirectories), new SortByNameComparer());
-         SortedSet<DirectoryInfo> dirs = new SortedSet<DirectoryInfo>(dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories), new SortByNameComparer());
+         var files = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
 
          foreach (var file in files)
          {
@@ -30,6 +29,8 @@ internal class FileSystemEntriesSet
                LastWriteTime = file.LastWriteTime
             });
          }
+
+         var dirs = dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories);
 
          foreach (var dir in dirs)
          {
@@ -45,17 +46,5 @@ internal class FileSystemEntriesSet
       }
 
       throw new ArgumentException($"Given path \"{rootDir}\" not refers to an existing directory on disk.");
-   }
-
-   // Defines a comparer to create a sorted set
-   public class SortByNameComparer : IComparer<FileSystemInfo>
-   {
-      public int Compare(FileSystemInfo? info1, FileSystemInfo? info2)
-      {
-         var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-         var comparer = isWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-
-         return comparer.Compare(info1?.Name, info2?.Name);
-      }
    }
 }

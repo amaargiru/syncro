@@ -1,6 +1,6 @@
 ﻿namespace SyncroCore;
 
-// Light weight alternative for FileInfo and DirectoryInfo
+/// Light weight local alternative for FileInfo and DirectoryInfo
 public record FileSystemEntryInfo : IComparable<FileSystemEntryInfo>
 {
     public string? ShortName { get; set; }
