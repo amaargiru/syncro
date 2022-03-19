@@ -1,6 +1,7 @@
 ﻿using SyncroCore;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using System.Threading.Channels;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
@@ -15,37 +16,49 @@ Log.Logger = new LoggerConfiguration()
 
 Log.Debug("Run Syncro...");
 
-Synchronize synchronize = new();
+Channel<string> channel = Channel.CreateUnbounded<string>();
+Synchronize synchronize = new(channel);
 SynchInfo synchInfo;
 
-var primaryDirectory = @"Example of two diff dirs\DirA";
-var secondaryDirectory = @"Example of two diff dirs\DirB";
+var primaryDirectory = @"D:\Polygon\Example of two diff dirs 2\DirA";
+var secondaryDirectory = @"D:\Polygon\Example of two diff dirs 2\DirB";
 
 if (!Directory.Exists(primaryDirectory))
-   Console.WriteLine($"Primary directory {primaryDirectory} doesn't exist");
+    Console.WriteLine($"Primary directory {primaryDirectory} doesn't exist");
 else if (!Directory.Exists(secondaryDirectory))
-   Console.WriteLine($"Secondary directory {secondaryDirectory} doesn't exist");
+    Console.WriteLine($"Secondary directory {secondaryDirectory} doesn't exist");
 else
 {
-   if (!Path.IsPathFullyQualified(primaryDirectory))
-   {
-      primaryDirectory = Path.GetFullPath(primaryDirectory);
-   }
+    if (!Path.IsPathFullyQualified(primaryDirectory))
+    {
+        primaryDirectory = Path.GetFullPath(primaryDirectory);
+    }
 
-   if (!Path.IsPathFullyQualified(secondaryDirectory))
-   {
-      secondaryDirectory = Path.GetFullPath(secondaryDirectory);
-   }
+    if (!Path.IsPathFullyQualified(secondaryDirectory))
+    {
+        secondaryDirectory = Path.GetFullPath(secondaryDirectory);
+    }
 
-   synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
+    synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
 
-   var totalItemsToDo = synchInfo.Count();
-   Log.Debug($"Total items = {totalItemsToDo}");
+    var totalItemsToDo = synchInfo.Count();
+    Log.Debug($"Total items = {totalItemsToDo}");
 
-   synchronize.DeleteSecondaryFiles(secondaryDirectory, synchInfo);
-   synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);
-   synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
-   synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
+    var a = Console.GetCursorPosition();
+    Console.SetCursorPosition(0, a.Top);
+
+    await synchronize.DeleteSecondaryFilesAsync(secondaryDirectory, synchInfo);
+    await synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);
+    await synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
+    await synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
+
+    while (await channel.Reader.WaitToReadAsync())
+    {
+        if (channel.Reader.TryRead(out var msg))
+        {
+            Console.WriteLine("Info from channel" + msg);
+        }
+    }
 }
 
 Console.Read();
