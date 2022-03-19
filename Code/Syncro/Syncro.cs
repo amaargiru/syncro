@@ -47,18 +47,25 @@ else
     var a = Console.GetCursorPosition();
     Console.SetCursorPosition(0, a.Top);
 
+    MessageReaderAsync(channel);
+
     await synchronize.DeleteSecondaryFilesAsync(secondaryDirectory, synchInfo);
     await synchronize.DeleteSecondaryDirectories(secondaryDirectory, synchInfo);
     await synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
     await synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
 
+    Log.Debug("All done.");
+}
+
+Console.Read();
+
+static async Task MessageReaderAsync(Channel<string> channel)
+{
     while (await channel.Reader.WaitToReadAsync())
     {
         if (channel.Reader.TryRead(out var msg))
         {
-            Console.WriteLine("Info from channel" + msg);
+            Log.Debug(msg);
         }
     }
 }
-
-Console.Read();

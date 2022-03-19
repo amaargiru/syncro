@@ -43,7 +43,6 @@ public class Synchronize
             FileInfo fInfo = new FileInfo(fullFilePath);
             fInfo.IsReadOnly = false;
             File.Delete(fullFilePath);
-            // Log.Debug($"[DEL] File {fullFilePath} has been deleted");
             await channel.Writer.WriteAsync($"[DEL] File {fullFilePath} has been deleted");
         }
     }
@@ -58,7 +57,6 @@ public class Synchronize
             if (Directory.Exists(fullDirPath))
             {
                 Directory.Delete(fullDirPath, recursive: true);
-                // Log.Debug($"[DEL] Directory {fullDirPath} has been deleted");
                 await channel.Writer.WriteAsync($"[DEL] Directory {fullDirPath} has been deleted");
             }
         }
@@ -71,7 +69,6 @@ public class Synchronize
             var fullDirPath = secondaryDirectory + dir.MiddleName;
 
             Directory.CreateDirectory(fullDirPath);
-            // Log.Debug($"[CREATE] Directory {fullDirPath} has been created");
             await channel.Writer.WriteAsync($"[CREATE] Directory {fullDirPath} has been created");
         }
     }
@@ -83,7 +80,6 @@ public class Synchronize
             var fullFilePath = primaryDirectory + file.MiddleName;
 
             File.Copy(primaryDirectory + file.MiddleName, secondaryDirectory + file.MiddleName, true);
-            // Log.Debug($"[COPY] File {fullFilePath} has been copied");
             await channel.Writer.WriteAsync($"[COPY] File {fullFilePath} has been copied");
         }
     }
