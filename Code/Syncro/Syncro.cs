@@ -1,6 +1,6 @@
-﻿using SyncroCore;
-using Serilog;
+﻿using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using SyncroCore;
 using System.Threading.Channels;
 
 namespace Syncro;
@@ -54,7 +54,6 @@ internal static class ConsoleSyncro
             Log.Debug($"Total items = {totalItemsToDo}");
 
             var currentCursorPosition = Console.GetCursorPosition();
-            // Console.SetCursorPosition(0, a.Top);
 
             MessageLoggerAsync(channel, logLines, currentCursorPosition.Top);
 
@@ -74,13 +73,44 @@ internal static class ConsoleSyncro
         FixedSizeQueue<string> log_messages = new();
         log_messages.Limit = logLines;
 
+        var depth = currentCursorY;
+        var item = 1;
+
         while (await channel.Reader.WaitToReadAsync())
         {
             if (channel.Reader.TryRead(out var msg))
             {
-                log_messages.Enqueue(msg);
-                Log.Debug(msg);
+                log_messages.Enqueue(item++ + " " + msg);
+
+                var list = log_messages.ToList();
+
+                ClearConsoleBelow(currentCursorY, depth);
+                Console.SetCursorPosition(0, currentCursorY);
+
+                foreach (var m in list)
+                {
+                    if (m != null)
+                    {
+                        Log.Debug(m);
+                        depth = Console.GetCursorPosition().Top;
+                    }
+                }
             }
         }
+    }
+
+    static void ClearConsoleBelow(int Y, int depth)
+    {
+        for (var i = Y; i < depth; i++)
+        {
+            ClearConsoleString(i);
+        }
+    }
+
+    static void ClearConsoleString(int Y)
+    {
+        Console.SetCursorPosition(0, Y);
+        Console.Write(new string(' ', Console.BufferWidth));
+        Console.SetCursorPosition(0, Y);
     }
 }

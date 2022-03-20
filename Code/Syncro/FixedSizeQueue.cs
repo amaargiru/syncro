@@ -15,4 +15,9 @@ public class FixedSizeQueue<T>
             while (q.Count > Limit && q.TryDequeue(out overflow)) ;
         }
     }
+
+    public List<T> ToList()
+        {
+        return q.ToList();
+    }
 }
