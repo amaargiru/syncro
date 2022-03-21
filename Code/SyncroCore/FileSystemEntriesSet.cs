@@ -1,50 +1,48 @@
-﻿using System.Runtime.InteropServices;
-
-namespace SyncroCore;
+﻿namespace SyncroCore;
 
 internal class FileSystemEntriesSet
 {
-   /// Returns sets of files and directories
-   internal SystemTreeInfo Get(string rootDir)
-   {
-      if (Directory.Exists(rootDir))
-      {
-         var dirInfo = new DirectoryInfo(rootDir);
-         SystemTreeInfo fileSystemInfo = new()
-         {
-            FileSet = new(),
-            DirSet = new()
-         };
+    /// Returns sets of files and directories
+    internal SystemTreeInfo Get(string rootDir)
+    {
+        if (!Directory.Exists(rootDir))
+        {
+            throw new ArgumentException($"Given path \"{rootDir}\" not refers to an existing directory on disk.");
+        }
 
-         var files = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+        var dirInfo = new DirectoryInfo(rootDir);
+        SystemTreeInfo fileSystemInfo = new()
+        {
+            FileSet = new SortedSet<FileSystemEntryInfo>(),
+            DirSet = new SortedSet<FileSystemEntryInfo>()
+        };
 
-         foreach (var file in files)
-         {
+        var files = dirInfo.EnumerateFiles("*", SearchOption.AllDirectories);
+
+        foreach (var file in files)
+        {
             fileSystemInfo.FileSet.Add
             (new FileSystemEntryInfo
             {
-               MiddleName = file.FullName.Replace(rootDir, ""), // Remove parent directory's name from relative path
-               ShortName = file.Name,
-               Size = file.Length,
-               LastWriteTime = file.LastWriteTime
+                MiddleName = file.FullName.Replace(rootDir, ""), // Remove parent directory's name from relative path
+                ShortName = file.Name,
+                Size = file.Length,
+                LastWriteTime = file.LastWriteTime
             });
-         }
+        }
 
-         var dirs = dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories);
+        var dirs = dirInfo.EnumerateDirectories("*", SearchOption.AllDirectories);
 
-         foreach (var dir in dirs)
-         {
+        foreach (var dir in dirs)
+        {
             fileSystemInfo.DirSet.Add
             (new FileSystemEntryInfo
             {
-               MiddleName = dir.FullName.Replace(rootDir, ""), // Remove parent directory's name from relative path
-               ShortName = dir.Name
+                MiddleName = dir.FullName.Replace(rootDir, ""), // Remove parent directory's name from relative path
+                ShortName = dir.Name
             });
-         }
+        }
 
-         return fileSystemInfo;
-      }
-
-      throw new ArgumentException($"Given path \"{rootDir}\" not refers to an existing directory on disk.");
-   }
+        return fileSystemInfo;
+    }
 }

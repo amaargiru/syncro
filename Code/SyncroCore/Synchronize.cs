@@ -1,14 +1,13 @@
 ﻿namespace SyncroCore;
-using Serilog;
 using System.Threading.Channels;
 
 public class Synchronize
 {
-    Channel<string> channel;
+    private Channel<string> _channel;
 
     public Synchronize(Channel<string> channel)
     {
-        this.channel = channel;
+        this._channel = channel;
     }
 
     public SynchInfo PrepareMirror(string primaryDirectory, string secondaryDirectory)
@@ -40,10 +39,13 @@ public class Synchronize
         {
             var fullFilePath = secondaryDirectory + file.MiddleName;
 
-            FileInfo fInfo = new FileInfo(fullFilePath);
-            fInfo.IsReadOnly = false;
+            var fInfo = new FileInfo(fullFilePath)
+            {
+                IsReadOnly = false
+            };
+
             File.Delete(fullFilePath);
-            await channel.Writer.WriteAsync($"[DEL] File {fullFilePath} has been deleted");
+            await _channel.Writer.WriteAsync($"[DEL] File {fullFilePath} has been deleted");
         }
     }
 
@@ -56,8 +58,8 @@ public class Synchronize
             // This folder may have been deleted by a previous operation as a subfolder
             if (Directory.Exists(fullDirPath))
             {
-                Directory.Delete(fullDirPath, recursive: true);
-                await channel.Writer.WriteAsync($"[DEL] Directory {fullDirPath} has been deleted");
+                Directory.Delete(fullDirPath, true);
+                await _channel.Writer.WriteAsync($"[DEL] Directory {fullDirPath} has been deleted");
             }
         }
     }
@@ -69,7 +71,7 @@ public class Synchronize
             var fullDirPath = secondaryDirectory + dir.MiddleName;
 
             Directory.CreateDirectory(fullDirPath);
-            await channel.Writer.WriteAsync($"[CREATE] Directory {fullDirPath} has been created");
+            await _channel.Writer.WriteAsync($"[CREATE] Directory {fullDirPath} has been created");
         }
     }
 
@@ -80,7 +82,7 @@ public class Synchronize
             var fullFilePath = primaryDirectory + file.MiddleName;
 
             File.Copy(primaryDirectory + file.MiddleName, secondaryDirectory + file.MiddleName, true);
-            await channel.Writer.WriteAsync($"[COPY] File {fullFilePath} has been copied");
+            await _channel.Writer.WriteAsync($"[COPY] File {fullFilePath} has been copied");
         }
     }
 }

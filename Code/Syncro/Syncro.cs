@@ -10,34 +10,36 @@ internal static class ConsoleSyncro
 {
     private static async Task Main()
     {
-
         Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Verbose()
-    .WriteTo.Console(
-         theme: AnsiConsoleTheme.Code,
-         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
-    .WriteTo.File(@"log\syncro_log.txt",
-        fileSizeLimitBytes: 10_000_000,
-        retainedFileCountLimit: 5,
-        rollOnFileSizeLimit: true,
-        restrictedToMinimumLevel: LogEventLevel.Debug)
-    .CreateLogger();
+            .MinimumLevel.Verbose()
+            .WriteTo.Console(
+                theme: AnsiConsoleTheme.Code,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
+            .WriteTo.File(@"log\syncro_log.txt",
+                fileSizeLimitBytes: 10_000_000,
+                retainedFileCountLimit: 5,
+                rollOnFileSizeLimit: true,
+                restrictedToMinimumLevel: LogEventLevel.Debug)
+            .CreateLogger();
 
         Log.Information("Run Syncro...");
 
-        var logLines = 4;
+        const int logLines = 4;
 
-        Channel<string> channel = Channel.CreateUnbounded<string>();
+        var channel = Channel.CreateUnbounded<string>();
         Synchronize synchronize = new(channel);
-        SynchInfo synchInfo;
 
         var primaryDirectory = @"C:\Example of two diff dirs 2\DirA";
         var secondaryDirectory = @"C:\Example of two diff dirs 2\DirB";
 
         if (!Directory.Exists(primaryDirectory))
+        {
             Console.WriteLine($"Primary directory {primaryDirectory} doesn't exist");
+        }
         else if (!Directory.Exists(secondaryDirectory))
+        {
             Console.WriteLine($"Secondary directory {secondaryDirectory} doesn't exist");
+        }
         else
         {
             if (!Path.IsPathFullyQualified(primaryDirectory))
@@ -50,7 +52,7 @@ internal static class ConsoleSyncro
                 secondaryDirectory = Path.GetFullPath(secondaryDirectory);
             }
 
-            synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
+            var synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
 
             var totalItemsToDo = synchInfo.Count();
             Log.Information($"Total items = {totalItemsToDo}");
@@ -70,10 +72,12 @@ internal static class ConsoleSyncro
         }
     }
 
-    static async Task MessageLoggerAsync(Channel<string> channel, int logLines, int currentCursorY)
+    private static async Task MessageLoggerAsync(Channel<string> channel, int logLines, int currentCursorY)
     {
-        FixedSizeQueue<string> log_messages = new();
-        log_messages.Limit = logLines;
+        FixedSizeQueue<string> logMessages = new()
+        {
+            Limit = logLines
+        };
 
         var depth = currentCursorY;
         var item = 1;
@@ -82,38 +86,35 @@ internal static class ConsoleSyncro
         {
             if (channel.Reader.TryRead(out var messageFromChannel))
             {
-            //Log.Information(messageFromChannel);
-            log_messages.Enqueue(item++ + " " + messageFromChannel);
+                //Log.Information(messageFromChannel);
+                logMessages.Enqueue(item++ + " " + messageFromChannel);
 
-                var list = log_messages.ToList();
+                var list = logMessages.ToList();
 
                 ClearConsoleBelow(currentCursorY, depth);
                 Console.SetCursorPosition(0, currentCursorY);
 
                 foreach (var messageToConsole in list)
                 {
-                    if (messageToConsole != null)
-                    {
-                        Log.Verbose(messageToConsole);
-                        depth = Console.GetCursorPosition().Top;
-                    }
+                    Log.Verbose(messageToConsole);
+                    depth = Console.GetCursorPosition().Top;
                 }
             }
         }
     }
 
-    static void ClearConsoleBelow(int Y, int depth)
+    private static void ClearConsoleBelow(int y, int depth)
     {
-        for (var i = Y; i < depth; i++)
+        for (var i = y; i < depth; i++)
         {
             ClearConsoleString(i);
         }
     }
 
-    static void ClearConsoleString(int Y)
+    private static void ClearConsoleString(int y)
     {
-        Console.SetCursorPosition(0, Y);
+        Console.SetCursorPosition(0, y);
         Console.Write(new string(' ', Console.BufferWidth));
-        Console.SetCursorPosition(0, Y);
+        Console.SetCursorPosition(0, y);
     }
 }
