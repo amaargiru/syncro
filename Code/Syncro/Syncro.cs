@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using SyncroCore;
 using System.Threading.Channels;
@@ -11,17 +12,18 @@ internal static class ConsoleSyncro
     {
 
         Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .MinimumLevel.Verbose()
     .WriteTo.Console(
          theme: AnsiConsoleTheme.Code,
          outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
-    .WriteTo.File(@"log\log2048.txt",
-        fileSizeLimitBytes: 1000_000,
+    .WriteTo.File(@"log\syncro_log.txt",
+        fileSizeLimitBytes: 10_000_000,
         retainedFileCountLimit: 5,
-        rollOnFileSizeLimit: true)
+        rollOnFileSizeLimit: true,
+        restrictedToMinimumLevel: LogEventLevel.Debug)
     .CreateLogger();
 
-        Log.Debug("Run Syncro...");
+        Log.Information("Run Syncro...");
 
         var logLines = 4;
 
@@ -29,8 +31,8 @@ internal static class ConsoleSyncro
         Synchronize synchronize = new(channel);
         SynchInfo synchInfo;
 
-        var primaryDirectory = @"D:\Polygon\Example of two diff dirs 2\DirA";
-        var secondaryDirectory = @"D:\Polygon\Example of two diff dirs 2\DirB";
+        var primaryDirectory = @"C:\Example of two diff dirs 2\DirA";
+        var secondaryDirectory = @"C:\Example of two diff dirs 2\DirB";
 
         if (!Directory.Exists(primaryDirectory))
             Console.WriteLine($"Primary directory {primaryDirectory} doesn't exist");
@@ -51,7 +53,7 @@ internal static class ConsoleSyncro
             synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
 
             var totalItemsToDo = synchInfo.Count();
-            Log.Debug($"Total items = {totalItemsToDo}");
+            Log.Information($"Total items = {totalItemsToDo}");
 
             var currentCursorPosition = Console.GetCursorPosition();
 
@@ -62,7 +64,7 @@ internal static class ConsoleSyncro
             await synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
             await synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
 
-            Log.Debug("All done.");
+            Log.Information("All done.");
 
             Console.Read();
         }
@@ -78,20 +80,21 @@ internal static class ConsoleSyncro
 
         while (await channel.Reader.WaitToReadAsync())
         {
-            if (channel.Reader.TryRead(out var msg))
+            if (channel.Reader.TryRead(out var messageFromChannel))
             {
-                log_messages.Enqueue(item++ + " " + msg);
+            //Log.Information(messageFromChannel);
+            log_messages.Enqueue(item++ + " " + messageFromChannel);
 
                 var list = log_messages.ToList();
 
                 ClearConsoleBelow(currentCursorY, depth);
                 Console.SetCursorPosition(0, currentCursorY);
 
-                foreach (var m in list)
+                foreach (var messageToConsole in list)
                 {
-                    if (m != null)
+                    if (messageToConsole != null)
                     {
-                        Log.Debug(m);
+                        Log.Verbose(messageToConsole);
                         depth = Console.GetCursorPosition().Top;
                     }
                 }
