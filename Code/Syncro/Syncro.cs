@@ -8,18 +8,26 @@ namespace Syncro;
 
 internal static class ConsoleSyncro
 {
-   const string logToConsoleOnly = "Processed:";
-   const string logToFileOnly = "File log:";
-   private static async Task Main()
+   const string logToConsoleOnly = "Processed:"; // Prefix for messages published in the console only
+   const string logToFileOnly = "File log:"; // Prefix for messages saved to file only
+   const string mainLogFile = @"log\syncro_main_log.txt";
+   const string operationsLogFile = @"log\syncro_operations_log.txt";
+   const string LoggingTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}";
+
+   const int logLines = 4;
+   private static async Task Main(string[] args)
     {
- Log.Logger = new LoggerConfiguration()
+      var primaryDirectory = args[0];
+      var secondaryDirectory = args[1];
+
+      Log.Logger = new LoggerConfiguration()
                   .WriteTo.Logger(lc => lc
                   .Filter.ByExcluding(x => x.MessageTemplate.Text.StartsWith(logToConsoleOnly) || x.MessageTemplate.Text.StartsWith(logToFileOnly))
     .MinimumLevel.Debug()
     .WriteTo.Console(
          theme: AnsiConsoleTheme.Code,
-         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
-    .WriteTo.File(@"log\syncro_main_log.txt",
+         outputTemplate: LoggingTemplate)
+    .WriteTo.File(mainLogFile,
         fileSizeLimitBytes: 1_000_000,
         retainedFileCountLimit: 5,
         rollOnFileSizeLimit: true,
@@ -30,12 +38,12 @@ internal static class ConsoleSyncro
     .MinimumLevel.Debug()
     .WriteTo.Console(
          theme: AnsiConsoleTheme.Code,
-         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
+         outputTemplate: LoggingTemplate)
     )
                   .WriteTo.Logger(lc => lc
          .Filter.ByIncludingOnly(x => x.MessageTemplate.Text.StartsWith(logToFileOnly))
     .MinimumLevel.Debug()
-    .WriteTo.File(@"log\syncro_operations_log.txt",
+    .WriteTo.File(operationsLogFile,
         fileSizeLimitBytes: 10_000_000,
         retainedFileCountLimit: 10,
         rollOnFileSizeLimit: true,
@@ -43,16 +51,10 @@ internal static class ConsoleSyncro
     )
     .CreateLogger();
 
-
         Log.Information("Run Syncro...");
 
-        const int logLines = 4;
-
-        var channel = Channel.CreateUnbounded<string>();
-        Synchronize synchronize = new(channel);
-
-        var primaryDirectory = @"C:\Example of two diff dirs 2\DirA";
-        var secondaryDirectory = @"C:\Example of two diff dirs 2\DirB";
+        var channel = Channel.CreateUnbounded<string>(); // Unbounded channel is for MVP only, use Bounded in real life
+      Synchronize synchronize = new(channel);
 
         if (!Directory.Exists(primaryDirectory))
         {
@@ -76,8 +78,7 @@ internal static class ConsoleSyncro
 
             var synchInfo = synchronize.PrepareMirror(primaryDirectory, secondaryDirectory);
 
-            var totalItemsToDo = synchInfo.Count();
-            Log.Information($"Total items = {totalItemsToDo}");
+            Log.Information($"Total items = {synchInfo.Count()}");
 
             var currentCursorPosition = Console.GetCursorPosition();
 
@@ -102,16 +103,15 @@ internal static class ConsoleSyncro
         };
 
         var depth = currentCursorY;
-        var item = 1;
 
         while (await channel.Reader.WaitToReadAsync())
         {
             if (channel.Reader.TryRead(out var messageFromChannel))
             {
-                Log.Information(logToFileOnly + " " + messageFromChannel);
-                logMessages.Enqueue(item++ + " " + messageFromChannel);
+                Log.Information(logToFileOnly + " " + messageFromChannel); // Message will write to file
+                logMessages.Enqueue(messageFromChannel); // Message will show in console temporarily
 
-                var list = logMessages.ToList();
+               var list = logMessages.ToList();
 
                 ClearConsoleBelow(currentCursorY, depth);
                 Console.SetCursorPosition(0, currentCursorY);

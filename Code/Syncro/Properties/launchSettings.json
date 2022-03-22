@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Syncro": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Example of two diff dirs 2\\DirA\" \"C:\\Example of two diff dirs 2\\DirB\"",
+      "hotReloadEnabled": false
+    }
+  }
+}

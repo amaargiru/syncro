@@ -8,6 +8,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
     <ErrorReport>none</ErrorReport>
+    <RepositoryUrl>https://github.com/amaargiru/syncro</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
