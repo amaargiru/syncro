@@ -8,19 +8,41 @@ namespace Syncro;
 
 internal static class ConsoleSyncro
 {
-    private static async Task Main()
+   const string logToConsoleOnly = "Processed:";
+   const string logToFileOnly = "File log:";
+   private static async Task Main()
     {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Verbose()
-            .WriteTo.Console(
-                theme: AnsiConsoleTheme.Code,
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
-            .WriteTo.File(@"log\syncro_log.txt",
-                fileSizeLimitBytes: 10_000_000,
-                retainedFileCountLimit: 5,
-                rollOnFileSizeLimit: true,
-                restrictedToMinimumLevel: LogEventLevel.Debug)
-            .CreateLogger();
+ Log.Logger = new LoggerConfiguration()
+                  .WriteTo.Logger(lc => lc
+                  .Filter.ByExcluding(x => x.MessageTemplate.Text.StartsWith(logToConsoleOnly) || x.MessageTemplate.Text.StartsWith(logToFileOnly))
+    .MinimumLevel.Debug()
+    .WriteTo.Console(
+         theme: AnsiConsoleTheme.Code,
+         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
+    .WriteTo.File(@"log\syncro_main_log.txt",
+        fileSizeLimitBytes: 1_000_000,
+        retainedFileCountLimit: 5,
+        rollOnFileSizeLimit: true,
+        restrictedToMinimumLevel: LogEventLevel.Debug)
+    )
+         .WriteTo.Logger(lc => lc
+         .Filter.ByIncludingOnly(x => x.MessageTemplate.Text.StartsWith(logToConsoleOnly))
+    .MinimumLevel.Debug()
+    .WriteTo.Console(
+         theme: AnsiConsoleTheme.Code,
+         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message}{NewLine}")
+    )
+                  .WriteTo.Logger(lc => lc
+         .Filter.ByIncludingOnly(x => x.MessageTemplate.Text.StartsWith(logToFileOnly))
+    .MinimumLevel.Debug()
+    .WriteTo.File(@"log\syncro_operations_log.txt",
+        fileSizeLimitBytes: 10_000_000,
+        retainedFileCountLimit: 10,
+        rollOnFileSizeLimit: true,
+        restrictedToMinimumLevel: LogEventLevel.Debug)
+    )
+    .CreateLogger();
+
 
         Log.Information("Run Syncro...");
 
@@ -86,7 +108,7 @@ internal static class ConsoleSyncro
         {
             if (channel.Reader.TryRead(out var messageFromChannel))
             {
-                //Log.Information(messageFromChannel);
+                Log.Information(logToFileOnly + " " + messageFromChannel);
                 logMessages.Enqueue(item++ + " " + messageFromChannel);
 
                 var list = logMessages.ToList();
@@ -96,7 +118,7 @@ internal static class ConsoleSyncro
 
                 foreach (var messageToConsole in list)
                 {
-                    Log.Verbose(messageToConsole);
+                    Log.Information(logToConsoleOnly + " " + messageToConsole);
                     depth = Console.GetCursorPosition().Top;
                 }
             }

@@ -44,6 +44,7 @@ public class Synchronize
             IsReadOnly = false
          };
 
+         // This file may have been deleted during processing
          if (File.Exists(fullSecondaryFilePath))
          {
             File.Delete(fullSecondaryFilePath);
@@ -86,7 +87,7 @@ public class Synchronize
             var fullSecondaryFilePath = secondaryDirectory + file.MiddleName;
 
             File.Copy(fullPrimaryFilePath, fullSecondaryFilePath, overwrite: true);
-            await _channel.Writer.WriteAsync($"[COPY] File {fullPrimaryFilePath} has been copied");
+            await _channel.Writer.WriteAsync($"[COPY] File {fullPrimaryFilePath} has been copied to {fullSecondaryFilePath}");
         }
     }
 }
