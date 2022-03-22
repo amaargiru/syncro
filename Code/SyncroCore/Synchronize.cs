@@ -37,15 +37,18 @@ public class Synchronize
     {
         foreach (var file in synchInfo.SecondaryFilesToDelete)
         {
-            var fullFilePath = secondaryDirectory + file.MiddleName;
+            var fullSecondaryFilePath = secondaryDirectory + file.MiddleName;
 
-            var fInfo = new FileInfo(fullFilePath)
-            {
-                IsReadOnly = false
-            };
+         _ = new FileInfo(fullSecondaryFilePath)
+         {
+            IsReadOnly = false
+         };
 
-            File.Delete(fullFilePath);
-            await _channel.Writer.WriteAsync($"[DEL] File {fullFilePath} has been deleted");
+         if (File.Exists(fullSecondaryFilePath))
+         {
+            File.Delete(fullSecondaryFilePath);
+            await _channel.Writer.WriteAsync($"[DEL] File {fullSecondaryFilePath} has been deleted");
+         }
         }
     }
 
@@ -53,13 +56,13 @@ public class Synchronize
     {
         foreach (var dir in synchInfo.SecondaryDirectoriesToDelete)
         {
-            var fullDirPath = secondaryDirectory + dir.MiddleName;
+            var fullSecondaryDirPath = secondaryDirectory + dir.MiddleName;
 
-            // This folder may have been deleted by a previous operation as a subfolder
-            if (Directory.Exists(fullDirPath))
+            // This folder may have been deleted during processing
+            if (Directory.Exists(fullSecondaryDirPath))
             {
-                Directory.Delete(fullDirPath, true);
-                await _channel.Writer.WriteAsync($"[DEL] Directory {fullDirPath} has been deleted");
+                Directory.Delete(fullSecondaryDirPath, recursive: true);
+                await _channel.Writer.WriteAsync($"[DEL] Directory {fullSecondaryDirPath} has been deleted");
             }
         }
     }
@@ -68,10 +71,10 @@ public class Synchronize
     {
         foreach (var dir in synchInfo.SecondaryDirectoriesToCreate)
         {
-            var fullDirPath = secondaryDirectory + dir.MiddleName;
+            var fullSecondaryDirPath = secondaryDirectory + dir.MiddleName;
 
-            Directory.CreateDirectory(fullDirPath);
-            await _channel.Writer.WriteAsync($"[CREATE] Directory {fullDirPath} has been created");
+            Directory.CreateDirectory(fullSecondaryDirPath);
+            await _channel.Writer.WriteAsync($"[CREATE] Directory {fullSecondaryDirPath} has been created");
         }
     }
 
@@ -79,10 +82,11 @@ public class Synchronize
     {
         foreach (var file in synchInfo.PrimaryFilesToCopy)
         {
-            var fullFilePath = primaryDirectory + file.MiddleName;
+            var fullPrimaryFilePath = primaryDirectory + file.MiddleName;
+            var fullSecondaryFilePath = secondaryDirectory + file.MiddleName;
 
-            File.Copy(primaryDirectory + file.MiddleName, secondaryDirectory + file.MiddleName, true);
-            await _channel.Writer.WriteAsync($"[COPY] File {fullFilePath} has been copied");
+            File.Copy(fullPrimaryFilePath, fullSecondaryFilePath, overwrite: true);
+            await _channel.Writer.WriteAsync($"[COPY] File {fullPrimaryFilePath} has been copied");
         }
     }
 }
