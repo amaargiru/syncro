@@ -89,5 +89,7 @@ public class Synchronize
             File.Copy(fullPrimaryFilePath, fullSecondaryFilePath, overwrite: true);
             await _channel.Writer.WriteAsync($"[COPY] File {fullPrimaryFilePath} has been copied to {fullSecondaryFilePath}");
         }
-    }
+
+      await _channel.Writer.WriteAsync("[DONE]");
+   }
 }

@@ -89,13 +89,11 @@ internal static class ConsoleSyncro
             await synchronize.CreateSecondaryDirectories(secondaryDirectory, synchInfo);
             await synchronize.CopyFilesFromPrimaryToSecondary(primaryDirectory, secondaryDirectory, synchInfo);
 
-            Log.Information("All done.");
-
             Console.Read();
         }
     }
 
-    private static async Task MessageLoggerAsync(Channel<string> channel, int logLines, int currentCursorY)
+   private static async Task MessageLoggerAsync(Channel<string> channel, int logLines, int currentCursorY)
     {
         FixedSizeQueue<string> logMessages = new()
         {
@@ -106,22 +104,29 @@ internal static class ConsoleSyncro
 
         while (await channel.Reader.WaitToReadAsync())
         {
-            if (channel.Reader.TryRead(out var messageFromChannel))
+         if (channel.Reader.TryRead(out var messageFromChannel))
+         {
+            if (messageFromChannel != "[DONE]")
             {
-                Log.Information(logToFileOnly + " " + messageFromChannel); // Message will write to file
-                logMessages.Enqueue(messageFromChannel); // Message will show in console temporarily
+               Log.Information(logToFileOnly + " " + messageFromChannel); // Message will write to file
+               logMessages.Enqueue(messageFromChannel); // Message will show in console temporarily
 
                var list = logMessages.ToList();
 
-                ClearConsoleBelow(currentCursorY, depth);
-                Console.SetCursorPosition(0, currentCursorY);
+               ClearConsoleBelow(currentCursorY, depth);
+               Console.SetCursorPosition(0, currentCursorY);
 
-                foreach (var messageToConsole in list)
-                {
-                    Log.Information(logToConsoleOnly + " " + messageToConsole);
-                    depth = Console.GetCursorPosition().Top;
-                }
+               foreach (var messageToConsole in list)
+               {
+                  Log.Information(logToConsoleOnly + " " + messageToConsole);
+                  depth = Console.GetCursorPosition().Top;
+               }
             }
+            else
+            {
+               Log.Information("All done.");
+            }
+         }
         }
     }
 
